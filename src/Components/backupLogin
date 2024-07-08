@@ -1,0 +1,139 @@
+package Components.login;
+
+import Components.Splash;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class Login extends JFrame {
+
+    private JLabel userLabel;
+    private JTextField userText;
+    private JLabel passwordLabel;
+    private JPasswordField passwordText;
+    private JButton loginButton;
+    private JLabel logoLabel;
+    private JLabel backgroundLabel;
+    private JButton backButton;
+
+
+    public Login() {
+        // Setting the JFrame properties
+        setTitle("Login Page");
+        setSize(900, 600);
+        setLocation(500, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Creating a JLayeredPane for layering components
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(new Dimension(900, 600));
+
+        // Adding background image
+        ImageIcon backgroundIcon = new ImageIcon(ClassLoader.getSystemResource("Images/LoginBackground.jpg")); // Adjust path as needed
+        Image backgroundFit = backgroundIcon.getImage().getScaledInstance(900, 600, Image.SCALE_DEFAULT);
+        ImageIcon icon = new ImageIcon(backgroundFit);
+        backgroundLabel = new JLabel(icon);
+        backgroundLabel.setBounds(0, 0, 900, 600);
+        layeredPane.add(backgroundLabel, Integer.valueOf(0));
+
+        // Adding logo at the top
+        ImageIcon logoIcon = new ImageIcon(ClassLoader.getSystemResource("Images/logo.png")); // Adjust path as needed
+        Image img = logoIcon.getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT);
+        ImageIcon icon2 = new ImageIcon(img);
+        logoLabel = new JLabel(icon2);
+        logoLabel.setBounds(400, 50, 100, 100);  // Adjust the position and size as needed
+        layeredPane.add(logoLabel, Integer.valueOf(1));
+
+        // Adding username label and text field
+        userLabel = new JLabel("Account Number");
+        userLabel.setBounds(350, 180, 200, 30);  // Adjust the position and size as needed
+        userLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        userLabel.setForeground(Color.BLACK);  // Optional: to ensure text is readable
+        layeredPane.add(userLabel, Integer.valueOf(1));
+
+        userText = new JTextField();
+        userText.setBounds(350, 210, 200, 30);  // Adjust the position and size as needed
+        userText.setFont(new Font("DIALOG_INPUT", Font.PLAIN, 16));
+        layeredPane.add(userText, Integer.valueOf(1));
+
+        // Adding password label and text field
+        passwordLabel = new JLabel("PIN");
+        passwordLabel.setBounds(350, 250, 200, 30);  // Adjust the position and size as needed
+        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        passwordLabel.setForeground(Color.BLACK);  // Optional: to ensure text is readable
+        layeredPane.add(passwordLabel, Integer.valueOf(1));
+
+        passwordText = new JPasswordField();
+        passwordText.setBounds(350, 280, 200, 30);  // Adjust the position and size as needed
+        passwordText.setFont(new Font("Arial", Font.PLAIN, 16));
+        layeredPane.add(passwordText, Integer.valueOf(1));
+
+        // Adding Sign In button
+        loginButton = new JButton("Sign In");
+        loginButton.setBounds(350, 330, 200, 40);  // Adjust the position and size as needed
+        loginButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        loginButton.setBackground(new Color(42, 172, 247));  // Set button background color
+        loginButton.setForeground(Color.WHITE);  // Set button text color
+        layeredPane.add(loginButton, Integer.valueOf(1));
+
+        backButton = new JButton("Back");
+        backButton.setBounds(350, 380, 200, 40);  // Adjust the position and size as needed
+        backButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        backButton.setBackground(Color.BLACK);  // Set button background color
+        backButton.setForeground(Color.WHITE);  // Set button text color
+        layeredPane.add(backButton, Integer.valueOf(2));
+
+        // Adding the layered pane to the frame
+        setContentPane(layeredPane);
+        setVisible(true);
+
+        // Adding action listener to the login button
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleLogin();
+            }
+        });
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                new Splash();
+                dispose();
+            }
+        });
+    }
+
+    private void handleLogin() {
+        String accountNumber = userText.getText();
+        String pin = new String(passwordText.getPassword());
+
+        // Database connection details
+        String url = "jdbc:mysql://localhost:3306/bank_management_system";
+        String user = "root";
+        String password = "your_database_password";  // Replace with your actual database password
+
+        try (Connection conn = DriverManager.getConnection(url, user, password)) {
+            String sql = "INSERT INTO login_info (account_number, pin) VALUES (?, ?)";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, accountNumber);
+                stmt.setString(2, pin);
+                stmt.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Login information saved successfully!");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error saving login information.");
+        }
+    }
+
+    public static void main(String[] args) {
+        new Login();
+    }
+}
